@@ -1,0 +1,84 @@
+// syntax file for s-expressions with custom atoms and options (not yet implemented)
+
+WHITESPACE = _{ " " | NEWLINE } // for sexprs, whitespace is irrelevant
+
+line_comment = @{ ";" ~ (!NEWLINE ~ ANY)* ~ NEWLINE }
+block_comment = @{ "#|" ~ (!"|#" ~ ANY)* ~ "|#" }
+
+COMMENT = _{ block_comment | line_comment   }
+// dealing with sexpr comments separately
+
+lbrack = _{ "{" | "[" | "(" }
+rbrack = _{ "}" | "]" | ")" }
+hex = _{ '0'..'9' | 'a'..'f' | 'A'..'F' }
+
+// ------------- symbol stuff
+symchar = @{ // TODO: think what other chars cannot be included. hmmm
+  !(WHITESPACE | lbrack | rbrack| "#;")
+    ~ ANY
+} 
+// in essence, a symbol's first character cannot be a digit
+symchar_first_digit = @{
+  !('0'..'9') ~ symchar
+}
+symbol = @{ symchar_first_digit ~ (symchar*) }
+
+// ------------- bool stuff
+bool_false = { "#false" | "#f" }
+bool_true = { "#true" | "#t"  }
+bool = { bool_false | bool_true }
+
+// ------------- int stuff
+dec_int_first = @{ '0'..'9' | ( "-" ~ '0'..'9') }
+dec_integer = @{ dec_int_first ~ ('0'..'9' | "_")* }
+hex_integer = @{ "0x" ~ hex+ }
+integer = { hex_integer | dec_integer }
+
+// ------------- float stuff
+float = @{
+    dec_integer? ~ "." ~ dec_integer | // left is optional so that this works: ".232"
+    dec_integer ~ "." ~ dec_integer? | // right is optional so that this works: "32."
+    dec_integer ~ "f" // you can do stuff like: "1f" and it will be equivalent to "1.0"
+}
+
+// ------------- string stuff... halp
+unicode_hex = @{ hex{1, 6} }
+predefined = @{ "n" | "r" | "t" | "\\" | "0" | "\"" | "'" }
+byte       = @{ "x" ~ hex{2} }
+unicode    = @{ "u" ~ "{" ~ unicode_hex ~ "}" }
+escape     = @{ "\\" ~ (predefined | byte | unicode) }
+raw_string = @{ (!("\\" | "\"") ~ ANY)+ }
+string = @{ "\"" ~ (raw_string | escape)* ~ "\"" }
+
+// ------------- quoted value stuff
+quoted = { "'" ~ sexpr }
+
+// ------------- quasiquoted value stuff
+quasiquoted = { "`" ~ sexpr }
+
+// ------------- unquoted value stuff
+unquoted = { "," ~ sexpr }
+
+// ------------- sexpr comment stuff
+sexpr_comment = { "#;" ~ sexpr }
+
+// NOTE: symbol has to be last, as it is kind of a "catch-all", see rule
+atom = { 
+  bool
+  | float
+  | integer
+  | string
+  | quoted
+  | quasiquoted
+  | unquoted
+  | sexpr_comment
+  | symbol
+} 
+
+slist = { 
+  "(" ~ sexpr* ~ ")"
+  | "[" ~ sexpr* ~ "]"
+  | "{" ~ sexpr* ~ "}"
+}
+
+sexpr = { atom | slist }
