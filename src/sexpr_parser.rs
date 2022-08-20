@@ -13,6 +13,25 @@ use crate::{
 pub struct SexprParser;
 
 impl SexprParser {
+    pub fn parse_all(input: &str) -> Result<Vec<Sexpr<TokInfo>>, ParsingError> {
+        let parsed = Self::parse(Rule::program, input)?
+            .next()
+            .unwrap()
+            .into_inner();
+        let mut result = Vec::new();
+        for p in parsed {
+            let rule = p.clone().as_rule();
+            if rule != Rule::EOI {
+                let x = Self::parse_sexpr(p);
+                if matches!(x, Err(ParsingError::NothingToParse)) {
+                    continue;
+                }
+                result.push(x?);
+            }
+        }
+        Ok(result)
+    }
+
     pub fn parse_str(input: &str) -> Result<Sexpr<TokInfo>, ParsingError> {
         let mut parsed = Self::parse(Rule::sexpr, input)?;
         Self::parse_sexpr(parsed.next().unwrap())

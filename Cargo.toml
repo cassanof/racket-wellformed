@@ -3,6 +3,12 @@ name = "racket-wellformed"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "debug"
+path = "src/debug.rs"
+test = false
+bench = false
+
 [dependencies]
 pest = "2.0"
 pest_derive = "2.0"

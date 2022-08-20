@@ -82,3 +82,9 @@ slist = {
 }
 
 sexpr = { atom | slist }
+
+program = {
+    SOI ~
+    sexpr* ~
+    EOI?
+}
