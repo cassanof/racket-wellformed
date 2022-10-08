@@ -1,14 +1,13 @@
 use pest::Span;
-use strum_macros::AsRefStr;
 
-#[derive(PartialEq, Debug, Clone, AsRefStr)]
+#[derive(PartialEq, Debug, Clone)]
 /// Represents a decorated S-expression value with extended type-assigned atoms.
 pub enum Sexpr<D> {
     Atom(Atom<D>, D),
     List(Vec<Sexpr<D>>, D),
 }
 
-#[derive(PartialEq, Debug, Clone, AsRefStr)]
+#[derive(PartialEq, Debug, Clone)]
 /// Represents the atoms of the S-expression, decorated as well.
 pub enum Atom<D> {
     Symbol(String, D),

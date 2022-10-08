@@ -9,6 +9,8 @@ pub enum ParsingError {
     Pest(String),
     /// Nothing to parse error. This can be handled as not an erorr, but as a warning.
     NothingToParse,
+    /// Bad wellformed config error.
+    BadWellformedConfig,
 }
 
 impl std::error::Error for ParsingError {}
@@ -25,6 +27,7 @@ impl std::fmt::Display for ParsingError {
             }
             ParsingError::Pest(msg) => write!(f, "Pest error:\n {}", msg),
             ParsingError::NothingToParse => write!(f, "Nothing to parse"),
+            ParsingError::BadWellformedConfig => write!(f, "Bad wellformed config"),
         }
     }
 }
